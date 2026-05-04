@@ -227,17 +227,10 @@ export default function App() {
   return (
     <div style={styles.app}>
       <header style={styles.header}>
-        <div style={styles.headerTop}>
-          <div style={styles.leftHeader}>
-            <img src="/logo-club.png" style={styles.logoClub} />
-          </div>
-
-          <div style={styles.headerCenter}>
-            <h1 style={styles.logo}>Modelo Claro Caja</h1>
-            <p style={styles.subtitulo}>Registro simple de ingresos y egresos</p>
-          </div>
-        </div>
-      </header>
+  <div style={styles.leftHeader}>
+    <img src="/logo-club.png" style={styles.logoClub} />
+  </div>
+</header>
 
       <div style={styles.progreso}>
         <div style={styles.pasosContainer}>
