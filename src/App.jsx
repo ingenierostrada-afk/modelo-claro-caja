@@ -44,6 +44,7 @@ export default function App() {
   const [editandoId, setEditandoId] = useState(null);
   const [filtroPeriodo, setFiltroPeriodo] = useState("mes");
   const [filtroTipo, setFiltroTipo] = useState("todos");
+  const [mostrarFormularioMovimiento, setMostrarFormularioMovimiento] = useState(false);
 
   useEffect(() => {
     const guardado = localStorage.getItem("modelo-claro-caja");
@@ -67,7 +68,7 @@ export default function App() {
     localStorage.setItem("modelo-claro-caja", JSON.stringify(caja));
   }, [caja]);
 
-  const pasos = ["Inicio", "1. Emprendimiento", "2. Registrar", "3. Movimientos", "4. Resumen"];
+  const pasos = ["Inicio", "1. Emprendimiento", "2. Movimientos", "3. Resumen"];
 
   const actualizarEmprendimiento = (campo, valor) => {
     setCaja((prev) => ({
@@ -184,7 +185,8 @@ export default function App() {
     }
 
     limpiarFormulario();
-    setPaso(3);
+    setMostrarFormularioMovimiento(false);
+    setPaso(2);
   };
 
   const limpiarFormulario = () => {
@@ -201,6 +203,7 @@ export default function App() {
       monto: String(movimiento.monto),
     });
     setEditandoId(movimiento.id);
+    setMostrarFormularioMovimiento(true);
     setPaso(2);
   };
 
@@ -218,6 +221,7 @@ export default function App() {
       localStorage.removeItem("modelo-claro-caja");
       setCaja(cajaInicial);
       limpiarFormulario();
+      setMostrarFormularioMovimiento(false);
       setPaso(0);
     }
   };
@@ -227,10 +231,17 @@ export default function App() {
   return (
     <div style={styles.app}>
       <header style={styles.header}>
-  <div style={styles.leftHeader}>
-    <img src="/logo-club.png" style={styles.logoClub} />
-  </div>
-</header>
+        <div style={styles.headerTop}>
+          <div style={styles.leftHeader}>
+            <img src="/logo-club.png" style={styles.logoClub} />
+          </div>
+
+          <div style={styles.headerCenter}>
+            <h1 style={styles.logo}>Modelo Claro Caja</h1>
+            <p style={styles.subtitulo}>Registro simple de ingresos y egresos</p>
+          </div>
+        </div>
+      </header>
 
       <div style={styles.progreso}>
         <div style={styles.pasosContainer}>
@@ -273,9 +284,7 @@ export default function App() {
               <Tarjeta titulo="Saldo actual" valor={`$${formato(resumen.todos.saldo)}`} destacado={resumen.todos.saldo >= 0} />
             </div>
 
-            <button style={styles.botonPrincipal} onClick={() => setPaso(1)}>
-              Empezar
-            </button>
+            
           </section>
         )}
 
@@ -301,103 +310,118 @@ export default function App() {
 
         {paso === 2 && (
           <section>
-            <h2 style={styles.tituloSeccion}>{editandoId ? "Editar movimiento" : "2. Registrar movimiento"}</h2>
-
-            <p style={styles.texto}>
-              Cargá cada ingreso o egreso en el momento en que ocurre. La clave del sistema es que sea rápido,
-              claro y fácil de sostener en el tiempo.
-            </p>
-
-            <div style={styles.selectorTipo}>
+            <div style={styles.tituloConAccion}>
+              <h2 style={{ ...styles.tituloSeccion, marginBottom: 0 }}>2. Movimientos</h2>
               <button
-                style={{
-                  ...styles.botonTipo,
-                  background: formulario.tipo === "ingreso" ? "#dcfce7" : "#f9fafb",
-                  color: formulario.tipo === "ingreso" ? "#166534" : "#374151",
-                  borderColor: formulario.tipo === "ingreso" ? "#86efac" : "#e5e7eb",
+                style={styles.botonPrincipal}
+                onClick={() => {
+                  limpiarFormulario();
+                  setMostrarFormularioMovimiento(true);
                 }}
-                onClick={() => actualizarFormulario("tipo", "ingreso")}
               >
-                + Ingreso
-              </button>
-
-              <button
-                style={{
-                  ...styles.botonTipo,
-                  background: formulario.tipo === "egreso" ? "#fee2e2" : "#f9fafb",
-                  color: formulario.tipo === "egreso" ? "#991b1b" : "#374151",
-                  borderColor: formulario.tipo === "egreso" ? "#fecaca" : "#e5e7eb",
-                }}
-                onClick={() => actualizarFormulario("tipo", "egreso")}
-              >
-                - Egreso
+                + Registrar movimiento
               </button>
             </div>
 
-            <div style={styles.formGrid}>
-              <Campo
-                label="Fecha"
-                type="date"
-                value={formulario.fecha}
-                onChange={(v) => actualizarFormulario("fecha", v)}
-              />
+            {mostrarFormularioMovimiento && (
+              <div style={styles.formularioMovimiento}>
+                <h3>{editandoId ? "Editar movimiento" : "Registrar movimiento"}</h3>
 
-              <Campo
-                label="Monto"
-                ayuda="Cargá solo números. Ej: 12500"
-                type="number"
-                value={formulario.monto}
-                onChange={(v) => actualizarFormulario("monto", v)}
-              />
-            </div>
+                <p style={styles.texto}>
+                  Cargá cada ingreso o egreso en el momento en que ocurre. La clave del sistema es que sea rápido,
+                  claro y fácil de sostener en el tiempo.
+                </p>
 
-            <Campo
-              label="Concepto"
-              ayuda="Ej: venta de torta, compra de harina, pago de alquiler, cobro de servicio."
-              value={formulario.concepto}
-              onChange={(v) => actualizarFormulario("concepto", v)}
-            />
+                <div style={styles.selectorTipo}>
+                  <button
+                    style={{
+                      ...styles.botonTipo,
+                      background: formulario.tipo === "ingreso" ? "#dcfce7" : "#f9fafb",
+                      color: formulario.tipo === "ingreso" ? "#166534" : "#374151",
+                      borderColor: formulario.tipo === "ingreso" ? "#86efac" : "#e5e7eb",
+                    }}
+                    onClick={() => actualizarFormulario("tipo", "ingreso")}
+                  >
+                    + Ingreso
+                  </button>
 
-            <div style={styles.formGrid}>
-              <CampoSelect
-                label="Categoría"
-                value={formulario.categoria}
-                opciones={categoriasDisponibles}
-                onChange={(v) => actualizarFormulario("categoria", v)}
-              />
+                  <button
+                    style={{
+                      ...styles.botonTipo,
+                      background: formulario.tipo === "egreso" ? "#fee2e2" : "#f9fafb",
+                      color: formulario.tipo === "egreso" ? "#991b1b" : "#374151",
+                      borderColor: formulario.tipo === "egreso" ? "#fecaca" : "#e5e7eb",
+                    }}
+                    onClick={() => actualizarFormulario("tipo", "egreso")}
+                  >
+                    - Egreso
+                  </button>
+                </div>
 
-              <CampoSelect
-                label="Medio de pago"
-                value={formulario.medioPago}
-                opciones={mediosPago}
-                onChange={(v) => actualizarFormulario("medioPago", v)}
-              />
-            </div>
+                <div style={styles.formGrid}>
+                  <Campo
+                    label="Fecha"
+                    type="date"
+                    value={formulario.fecha}
+                    onChange={(v) => actualizarFormulario("fecha", v)}
+                  />
 
-            <CampoArea
-              label="Notas opcionales"
-              ayuda="Podés agregar cliente, detalle del pedido o cualquier aclaración útil."
-              value={formulario.notas}
-              onChange={(v) => actualizarFormulario("notas", v)}
-            />
+                  <Campo
+                    label="Monto"
+                    ayuda={`Vista previa: $${formato(Number(formulario.monto) || 0)}`}
+                    type="number"
+                    value={formulario.monto}
+                    onChange={(v) => actualizarFormulario("monto", v)}
+                  />
+                </div>
 
-            <div style={styles.accionesFormulario}>
-              <button style={styles.botonPrincipal} onClick={guardarMovimiento}>
-                {editandoId ? "Guardar cambios" : "Guardar movimiento"}
-              </button>
+                <Campo
+                  label="Concepto"
+                  ayuda="Ej: venta de torta, compra de harina, pago de alquiler, cobro de servicio."
+                  value={formulario.concepto}
+                  onChange={(v) => actualizarFormulario("concepto", v)}
+                />
 
-              {editandoId && (
-                <button style={styles.botonSecundario} onClick={limpiarFormulario}>
-                  Cancelar edición
-                </button>
-              )}
-            </div>
-          </section>
-        )}
+                <div style={styles.formGrid}>
+                  <CampoSelect
+                    label="Categoría"
+                    value={formulario.categoria}
+                    opciones={categoriasDisponibles}
+                    onChange={(v) => actualizarFormulario("categoria", v)}
+                  />
 
-        {paso === 3 && (
-          <section>
-            <h2 style={styles.tituloSeccion}>3. Movimientos</h2>
+                  <CampoSelect
+                    label="Medio de pago"
+                    value={formulario.medioPago}
+                    opciones={mediosPago}
+                    onChange={(v) => actualizarFormulario("medioPago", v)}
+                  />
+                </div>
+
+                <CampoArea
+                  label="Notas opcionales"
+                  ayuda="Podés agregar cliente, detalle del pedido o cualquier aclaración útil."
+                  value={formulario.notas}
+                  onChange={(v) => actualizarFormulario("notas", v)}
+                />
+
+                <div style={styles.accionesFormulario}>
+                  <button style={styles.botonPrincipal} onClick={guardarMovimiento}>
+                    {editandoId ? "Guardar cambios" : "Guardar movimiento"}
+                  </button>
+
+                  <button
+                    style={styles.botonSecundario}
+                    onClick={() => {
+                      limpiarFormulario();
+                      setMostrarFormularioMovimiento(false);
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div style={styles.resumenBarra}>
               <div>
@@ -476,9 +500,9 @@ export default function App() {
           </section>
         )}
 
-        {paso === 4 && (
+        {paso === 3 && (
           <section>
-            <h2 style={styles.tituloSeccion}>4. Resumen de caja</h2>
+            <h2 style={styles.tituloSeccion}>3. Resumen de caja</h2>
 
             <div style={styles.resumenValor}>
               <h3>{caja.emprendimiento.nombre || "Emprendimiento sin nombre"}</h3>
@@ -522,28 +546,6 @@ export default function App() {
           </section>
         )}
 
-        <footer style={styles.footer}>
-          <button
-            style={styles.botonSecundario}
-            disabled={paso === 0}
-            onClick={() => setPaso((p) => Math.max(0, p - 1))}
-          >
-            Atrás
-          </button>
-
-          <div style={styles.footerDerecha}>
-            <button style={styles.botonMini} onClick={() => setPaso(2)}>
-              + Registrar
-            </button>
-
-            <button
-              style={styles.botonPrincipal}
-              onClick={() => setPaso((p) => Math.min(pasos.length - 1, p + 1))}
-            >
-              {paso === pasos.length - 1 ? "Ver movimientos" : "Siguiente"}
-            </button>
-          </div>
-        </footer>
       </main>
     </div>
   );
@@ -810,6 +812,21 @@ const styles = {
     fontSize: 15,
     fontFamily: "inherit",
     background: "white",
+  },
+  tituloConAccion: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 16,
+    marginBottom: 18,
+    flexWrap: "wrap",
+  },
+  formularioMovimiento: {
+    padding: 20,
+    borderRadius: 20,
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+    marginBottom: 22,
   },
   formGrid: {
     display: "grid",
